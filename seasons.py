@@ -111,7 +111,8 @@ def main(query):
         items = [i for i in items if i.frmt == "TV"]
         items.sort(key=lambda i: i.year)
         season = items.index(base_show)+1
-    return season
+    return season, base_show
 
 if __name__ == "__main__":
-    print("Season {}".format(main(argv[1])))
+    season, show = main(argv[1])
+    print("Title: {} ,Season: {}".format(show.title["romaji"], season))

@@ -58,6 +58,7 @@
                 </div>
             </div>
             <div class="card-body">
+                <h5>Title: <b id="animetitle">Search something first</b></h5>
                 <h5>Season: <b id="season">Search something first</b></h5>
                 <h6>JSON: <code id="jsonresponse">Search something first</code></h6>
             </div>
@@ -73,6 +74,7 @@
                 },function(data){
                     console.log(data)
                     $("#jsonresponse").html(JSON.stringify(data));
+                    $("#animetitle").html(data.items[0].title.romaji);
                     $("#season").html(data.season);
                 }, "json");
             });

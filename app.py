@@ -14,7 +14,7 @@ def season():
         return jsonify({"error":"No query passed"})
     try:
         season, show, items = main(query)
-        return jsonify({"query":query, "season":season, "title":show.title, "items":[vars(i) for i in items]})
+        return jsonify({"query":query, "season":season, "title":show.title, "items":[i.dict() for i in items]})
     except Exception as e:
         return jsonify({"query":query, "error":e})
 

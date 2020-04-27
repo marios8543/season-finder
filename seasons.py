@@ -11,6 +11,15 @@ class SortableAnime:
         self.title = title
         self.frmt = frmt
 
+    def dict(self):
+        return {
+            "id": self.id,
+            "year": self.year,
+            "type": self.type,
+            "title":  self.title,
+            "format": self.frmt
+        }
+
     def __eq__(self, other):
         return self.id == other.id
 

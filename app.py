@@ -13,8 +13,8 @@ def season():
     if not query:
         return jsonify({"error":"No query passed"})
     try:
-        season, show = main(query)
-        return jsonify({"query":query, "season":season, "title":show.title})
+        season, show, items = main(query)
+        return jsonify({"query":query, "season":season, "title":show.title, "items":[vars(i) for i in items]})
     except Exception as e:
         return jsonify({"query":query, "error":e})
 

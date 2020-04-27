@@ -108,7 +108,7 @@ def main(query):
                     f = True
             if not f:
                 break
-        items = [i for i in items if i.frmt == "TV"]
+        items = [i for i in items if i.frmt == "TV" and (i.type == "PREQUEL" or i.type == "SEQUEL")]
         items.sort(key=lambda i: i.year)
         season = items.index(base_show)+1
     return season, base_show, items

@@ -16,7 +16,7 @@ def season():
         season, show, items = main(query)
         return jsonify({"query":query, "season":season, "title":show.title, "items":[i.dict() for i in items]})
     except Exception as e:
-        return jsonify({"query":query, "error":e})
+        return jsonify({"query":query, "error":str(e)})
 
 if __name__=='__main__':
     app.run(debug=True)

@@ -1,4 +1,5 @@
 from requests import post
+from datetime import datetime
 from sys import argv
 
 BASE_URL = "https://graphql.anilist.co"
@@ -9,9 +10,9 @@ class BaseShowNotInList(Exception):
         super().__init__("Base show not in sequel/prequel list.")
 
 class SortableAnime:
-    def __init__(self, id, year, reltype, title, frmt):
+    def __init__(self, id, year, month, day, reltype, title, frmt):
         self.id = id
-        self.year = year if year else 9999
+        self.timestamp = datetime(year if year else 9999, month if month else 12, day if day else 31)
         self.type = reltype
         self.title = title
         self.frmt = frmt
@@ -19,7 +20,7 @@ class SortableAnime:
     def dict(self):
         return {
             "id": self.id,
-            "year": self.year,
+            "timestamp": self.timestamp.strftime("%d-%m-%Y"),
             "type": self.type,
             "title":  self.title,
             "format": self.frmt
@@ -62,6 +63,8 @@ def get_show(id):
                     }
                     startDate {
                         year
+                        month
+                        day
                     }
                     format
                     relations {
@@ -70,6 +73,8 @@ def get_show(id):
                             format
                             startDate {
                                 year
+                                month
+                                day
                             }
                             title {
                                 english
@@ -91,13 +96,13 @@ def get_show(id):
 
 def get_base_show(res):
     base = res["data"]["Media"]
-    return SortableAnime(base["id"], base["startDate"]["year"], "BASE", base["title"], base["format"])
+    return SortableAnime(base["id"], base["startDate"]["year"], base["startDate"]["month"], base["startDate"]["day"], "BASE", base["title"], base["format"])
 
 def process_shows(res):
     ls = []
     ls.append(get_base_show(res))
     for i,v in enumerate(res["data"]["Media"]["relations"]["nodes"]):
-        ls.append(SortableAnime(v["id"], v["startDate"]["year"], res["data"]["Media"]["relations"]["edges"][i]["relationType"], v["title"], v["format"]))
+        ls.append(SortableAnime(v["id"], v["startDate"]["year"], v["startDate"]["month"], v["startDate"]["day"], res["data"]["Media"]["relations"]["edges"][i]["relationType"], v["title"], v["format"]))
         pass
     return ls
 
@@ -110,6 +115,7 @@ def main(query):
 
     if "PREQUEL" not in [i.type for i in items]:
         season = 1
+        final_items = items
     else:
         ignore = []
         while True:
@@ -122,13 +128,19 @@ def main(query):
                     f = True
             if not f:
                 break
-        items = [i for i in items if i.frmt == "TV" and (i.type == "PREQUEL" or i.type == "SEQUEL" or i.type == "BASE")]
-        items.sort(key=lambda i: i.year)
-        if base_show in items:
-            season = items.index(base_show)+1
+        final_items = [i for i in items if i.frmt == "TV" and (i.type == "PREQUEL" or i.type == "SEQUEL" or i.type == "BASE")]
+        if not base_show in final_items:
+            final_items = [i for i in items if (i.type == "PREQUEL" or i.type == "SEQUEL" or i.type == "BASE")]
+        final_items.sort(key=lambda i: i.timestamp)
+        if base_show in final_items:
+            season = final_items.index(base_show)
+            if season:
+                season += 1
         else:
-            raise BaseShowNotInList(items)
-    return season, base_show, items
+            raise BaseShowNotInList(final_items)
+    if not season:
+        raise Exception("Cannot determine season")
+    return season, base_show, final_items
 
 if __name__ == "__main__":
     season, show, items = main(argv[1])

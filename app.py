@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify, request
-from seasons import main
+from seasons import main, BaseShowNotInList
 
 app = Flask(__name__)
 
@@ -15,6 +15,8 @@ def season():
     try:
         season, show, items = main(query)
         return jsonify({"query":query, "season":season, "title":show.title, "items":[i.dict() for i in items]})
+    except BaseShowNotInList as e:
+        return jsonify({"query":query, "error":str(e), "items":e.items})
     except Exception as e:
         return jsonify({"query":query, "error":str(e)})
 

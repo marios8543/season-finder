@@ -3,6 +3,11 @@ from sys import argv
 
 BASE_URL = "https://graphql.anilist.co"
 
+class BaseShowNotInList(Exception):
+    def __init__(self, items):
+        self.items = items
+        super().__init__("Base show not in sequel/prequel list.")
+
 class SortableAnime:
     def __init__(self, id, year, reltype, title, frmt):
         self.id = id
@@ -119,7 +124,10 @@ def main(query):
                 break
         items = [i for i in items if i.frmt == "TV" and (i.type == "PREQUEL" or i.type == "SEQUEL" or i.type == "BASE")]
         items.sort(key=lambda i: i.year)
-        season = items.index(base_show)+1
+        if base_show in items:
+            season = items.index(base_show)+1
+        else:
+            raise BaseShowNotInList(items)
     return season, base_show, items
 
 if __name__ == "__main__":
